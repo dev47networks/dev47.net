@@ -18,11 +18,10 @@ apt install -y git tree htop perl libnet-ssleay-perl openssl libauthen-pam-perl 
 
 # Clone the Nikto repository
 echo "Cloning the Nikto repository..."
-git clone https://github.com/sullo/nikto /root/nikto
+git clone https://github.com/sullo/nikto /tmp/nikto
 
 echo "Setting up environment..."
-cp /root/nikto/program/nikto.pl /usr/local/bin/nikto
-chmod +x /usr/local/bin/nikto
-rm -rf /root/nikto
+ln -s /tmp/nikto/program/nikto.pl /usr/local/bin/nikto
+ln -s /tmp/nikto/program/nikto.conf.default /usr/local/bin/nikto/nikto.conf.default
 
 echo "Setup complete. Usage: nikto -h <HOST:PORT>"
