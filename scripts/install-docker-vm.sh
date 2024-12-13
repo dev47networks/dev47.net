@@ -9,9 +9,9 @@ fi
 # Display Banner
 echo "############################################################"
 echo "#                                                          #"
-echo "#             Masscan Installation Script                  #"
+echo "#              Install Docker for Proxmox VM               #"
 echo "#                                                          #"
-echo "#               Last Updated: 2024-12-13                   #"
+echo "#                 Last Updated: 2024-12-13                 #"
 echo "#                                                          #"
 echo "############################################################"
 echo ""
@@ -32,94 +32,102 @@ show_spinner() {
 }
 
 #----------------------------------------------------------------------------
-#--- Update and Upgrade Packages
+#--- Install Docker
 #----------------------------------------------------------------------------
-echo -n "Updating system packages..."
+echo -n "Installing Docker..."
 {
-    apt update && apt upgrade -y
+    curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && rm -rf get-docker.sh
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to update system packages."
+    echo -e "        \xE2\x9D\x8C Error: Failed to install Docker."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Install Required Dependencies
+#--- Verify Docker Installation
 #----------------------------------------------------------------------------
-echo -n "Installing required dependencies for Masscan..."
+echo -n "Verifying Docker installation..."
 {
-    apt install -y git gcc make libpcap-dev
+    docker ps &> /dev/null
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to install required dependencies."
+    echo -e "        \xE2\x9D\x8C Error: Docker installation verification failed."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Clone Masscan Repository
+#--- Install dops
 #----------------------------------------------------------------------------
-echo -n "Cloning the Masscan repository..."
+echo -n "Installing better-docker-ps (dops)..."
 {
-    git clone https://github.com/robertdavidgraham/masscan /tmp/masscan
+    sudo wget "https://github.com/Mikescher/better-docker-ps/releases/latest/download/dops_linux-amd64-static" -O "/usr/local/bin/dops" && sudo chmod +x "/usr/local/bin/dops"
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to clone the Masscan repository."
+    echo -e "        \xE2\x9D\x8C Error: Failed to install dops."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Build Masscan from Source
+#--- Verify dops Installation
 #----------------------------------------------------------------------------
-echo -n "Building Masscan from source..."
+echo -n "Verifying dops installation..."
 {
-    cd /tmp/masscan
-    make -j$(nproc)
+    dops -a &> /dev/null
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to build Masscan from source."
+    echo -e "        \xE2\x9D\x8C Error: dops installation verification failed."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Install Masscan
+#--- Enable Docker API
 #----------------------------------------------------------------------------
-echo -n "Installing Masscan..."
+echo -n "Enabling Docker API..."
 {
-    cp /tmp/masscan/bin/masscan /usr/local/bin/masscan
+    echo '{"hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"]}' > /etc/docker/daemon.json
+
+    mkdir -p /etc/systemd/system/docker.service.d/
+    cat << 'EOF' > /etc/systemd/system/docker.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd
+EOF
+
+    systemctl daemon-reload && systemctl restart docker.service
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to install Masscan."
+    echo -e "        \xE2\x9D\x8C Error: Failed to enable Docker API."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Verify Masscan Installation
+#--- Final Verification
 #----------------------------------------------------------------------------
-echo -n "Verifying Masscan installation..."
+echo -n "Verifying Docker API..."
 {
-    command -v masscan &> /dev/null
+    curl -s http://localhost:2375/version &> /dev/null
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Masscan installation verification failed."
+    echo -e "        \xE2\x9D\x8C Error: Docker API verification failed."
     exit 1
 fi
 echo ""
-echo "Masscan installed and operational. Usage: masscan -p <PORT> <TARGET>"
+echo "Docker configuration completed successfully!"

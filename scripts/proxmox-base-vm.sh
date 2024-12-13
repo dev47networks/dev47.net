@@ -9,7 +9,7 @@ fi
 # Display Banner
 echo "############################################################"
 echo "#                                                          #"
-echo "#             Masscan Installation Script                  #"
+echo "#         Base Install Script for Proxmox VM               #"
 echo "#                                                          #"
 echo "#               Last Updated: 2024-12-13                   #"
 echo "#                                                          #"
@@ -32,94 +32,93 @@ show_spinner() {
 }
 
 #----------------------------------------------------------------------------
-#--- Update and Upgrade Packages
+#--- Packages Installation
 #----------------------------------------------------------------------------
-echo -n "Updating system packages..."
+echo -n "Updating and upgrading packages, and installing essentials..."
 {
-    apt update && apt upgrade -y
+    apt update && apt upgrade -y && apt install -y \
+        curl vim wget tree htop git screen python3-pip nfs-common cifs-utils bc \
+        apt-transport-https software-properties-common gnupg sudo unzip zip \
+        unattended-upgrades apt-listchanges dnsutils cron net-tools tcpdump btop qemu-guest-agent
+    systemctl start qemu-guest-agent
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to update system packages."
+    echo -e "        \xE2\x9D\x8C Error: Package installation failed."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Install Required Dependencies
+#--- Unattended Upgrades
 #----------------------------------------------------------------------------
-echo -n "Installing required dependencies for Masscan..."
+echo -n "Configuring unattended upgrades..."
 {
-    apt install -y git gcc make libpcap-dev
+    dpkg-reconfigure -f noninteractive unattended-upgrades
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to install required dependencies."
+    echo -e "        \xE2\x9D\x8C Error: Failed to configure unattended upgrades."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Clone Masscan Repository
+#--- Date and Timezone
 #----------------------------------------------------------------------------
-echo -n "Cloning the Masscan repository..."
+echo -n "Setting timezone to Europe/Vienna..."
 {
-    git clone https://github.com/robertdavidgraham/masscan /tmp/masscan
+    timedatectl set-timezone Europe/Vienna && date
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to clone the Masscan repository."
+    echo -e "        \xE2\x9D\x8C Error: Failed to set timezone."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Build Masscan from Source
+#--- Vim Configuration
 #----------------------------------------------------------------------------
-echo -n "Building Masscan from source..."
+echo -n "Configuring Vim settings..."
 {
-    cd /tmp/masscan
-    make -j$(nproc)
+    cat << 'EOF' > /root/.vimrc
+let &t_SI .= "\<Esc>[?2004h"
+let &t_EI .= "\<Esc>[?2004l"
+inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+function! XTermPasteBegin()
+  set pastetoggle=<Esc>[201~
+  set paste
+  return ""
+endfunction
+set backspace=indent,eol,start  " more powerful backspacing
+syntax on
+EOF
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to build Masscan from source."
+    echo -e "        \xE2\x9D\x8C Error: Failed to configure Vim."
     exit 1
 fi
 
 #----------------------------------------------------------------------------
-#--- Install Masscan
+#--- Final Verification
 #----------------------------------------------------------------------------
-echo -n "Installing Masscan..."
+echo -n "Verifying installation and configuration..."
 {
-    cp /tmp/masscan/bin/masscan /usr/local/bin/masscan
+    command -v vim &> /dev/null && command -v curl &> /dev/null && [[ -f /root/.vimrc ]]
 } &> /dev/null &
 show_spinner $!
 if [[ $? -eq 0 ]]; then
     echo -e "        \xE2\x9C\x94 done"
 else
-    echo -e "        \xE2\x9D\x8C Error: Failed to install Masscan."
-    exit 1
-fi
-
-#----------------------------------------------------------------------------
-#--- Verify Masscan Installation
-#----------------------------------------------------------------------------
-echo -n "Verifying Masscan installation..."
-{
-    command -v masscan &> /dev/null
-} &> /dev/null &
-show_spinner $!
-if [[ $? -eq 0 ]]; then
-    echo -e "        \xE2\x9C\x94 done"
-else
-    echo -e "        \xE2\x9D\x8C Error: Masscan installation verification failed."
+    echo -e "        \xE2\x9D\x8C Error: Verification failed. Please check the logs."
     exit 1
 fi
 echo ""
-echo "Masscan installed and operational. Usage: masscan -p <PORT> <TARGET>"
+echo "Base install completed successfully!"
