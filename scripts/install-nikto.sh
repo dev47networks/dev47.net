@@ -22,6 +22,6 @@ git clone https://github.com/sullo/nikto /tmp/nikto
 
 echo "Setting up environment..."
 ln -s /tmp/nikto/program/nikto.pl /usr/local/bin/nikto
-ln -s /tmp/nikto/program/nikto.conf.default /usr/local/bin/nikto/nikto.conf.default
+ln -s /tmp/nikto/program/nikto.conf.default /etc/nikto.conf
 
 echo "Setup complete. Usage: nikto -h <HOST:PORT>"
