@@ -14,7 +14,7 @@ apt update && apt upgrade -y
 
 # Install required packages
 echo "Installing required packages..."
-apt install -y git wget curl tree htop perl libnet-ssleay-perl openssl libauthen-pam-perl libio-pty-perl libmd5-perl
+apt install -y git tree htop perl libnet-ssleay-perl openssl libauthen-pam-perl libio-pty-perl
 
 # Clone the Nikto repository
 echo "Cloning the Nikto repository..."
