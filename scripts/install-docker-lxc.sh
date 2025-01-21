@@ -32,6 +32,21 @@ show_spinner() {
 }
 
 #----------------------------------------------------------------------------
+#--- Install Docker
+#----------------------------------------------------------------------------
+echo -n "Installing Docker..."
+{
+    curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && rm -rf get-docker.sh
+} &> /dev/null &
+show_spinner $!
+if [[ $? -eq 0 ]]; then
+    echo -e "        \xE2\x9C\x94 done"
+else
+    echo -e "        \xE2\x9D\x8C Error: Failed to install Docker."
+    exit 1
+fi
+
+#----------------------------------------------------------------------------
 #--- Install dops
 #----------------------------------------------------------------------------
 echo -n "Installing better-docker-ps (dops)..."
