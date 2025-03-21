@@ -118,6 +118,21 @@ else
 fi
 
 #----------------------------------------------------------------------------
+#--- Install Loki extension
+#----------------------------------------------------------------------------
+echo -n "Installing Loki extension..."
+{
+    docker plugin install grafana/loki-docker-driver:3.4.2-amd64 --alias loki --grant-all-permissions
+} &> /dev/null &
+show_spinner $!
+if [[ $? -eq 0 ]]; then
+    echo -e "        \xE2\x9C\x94 done"
+else
+    echo -e "        \xE2\x9D\x8C Error: Failed to install dops."
+    exit 1
+fi
+
+#----------------------------------------------------------------------------
 #--- Final Verification
 #----------------------------------------------------------------------------
 echo -n "Verifying Docker API..."
