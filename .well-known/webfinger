@@ -1,7 +1,7 @@
 {
     "links": [
         {
-            "href": "https://auth.dev47.net",
+            "href": "https://auth.dev47.net/application/o/tailscale/",
             "rel": "http://openid.net/specs/connect/1.0/issuer"
         }
     ],
