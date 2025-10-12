@@ -11,7 +11,7 @@ echo "############################################################"
 echo "#                                                          #"
 echo "#         Base Install Script for Proxmox VM               #"
 echo "#                                                          #"
-echo "#               Last Updated: 2024-12-13                   #"
+echo "#               Last Updated: 2025-10-12                   #"
 echo "#                                                          #"
 echo "############################################################"
 echo ""
@@ -37,7 +37,7 @@ show_spinner() {
 echo -n "Updating and upgrading packages, and installing essentials..."
 {
     apt update && apt upgrade -y && apt install -y \
-        curl vim wget tree htop git screen python3-pip nfs-common cifs-utils bc \
+        curl vim wget tree htop git screen python3-pip nfs-common nfs-kernel-server cifs-utils bc \
         apt-transport-https software-properties-common gnupg sudo unzip zip \
         unattended-upgrades apt-listchanges dnsutils cron net-tools tcpdump btop qemu-guest-agent
     systemctl start qemu-guest-agent
