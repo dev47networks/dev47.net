@@ -1,0 +1,4 @@
+Contact: mailto:admin@dev47.net
+Expires: 2026-12-31T23:00:00.000Z
+Preferred-Languages: en, de
+Canonical: https://dev47.net/.well-known/security.txt

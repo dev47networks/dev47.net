@@ -11,7 +11,7 @@ echo "############################################################"
 echo "#                                                          #"
 echo "#                  Install Node Exporter                   #"
 echo "#                                                          #"
-echo "#                 Last Updated: 2025-01-01                 #"
+echo "#                 Last Updated: 2025-05-29                 #"
 echo "#                                                          #"
 echo "############################################################"
 echo ""
@@ -34,7 +34,7 @@ show_spinner() {
 #----------------------------------------------------------------------------
 #--- Variables
 #----------------------------------------------------------------------------
-VERSION="1.8.2"
+VERSION="1.9.1"
 DOWNLOAD_URL="https://github.com/prometheus/node_exporter/releases/download/v${VERSION}/node_exporter-${VERSION}.linux-amd64.tar.gz"
 INSTALL_DIR="/opt/node_exporter-${VERSION}"
 SERVICE_FILE="/etc/systemd/system/node_exporter.service"
