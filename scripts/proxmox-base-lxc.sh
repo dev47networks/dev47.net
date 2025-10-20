@@ -38,7 +38,7 @@ echo -n "Updating and upgrading system packages..."
 {
     apt update && apt upgrade -y && apt install -y \
         curl vim wget tree htop git screen python3-pip nfs-common nfs-kernel-server cifs-utils bc \
-        apt-transport-https software-properties-common gnupg sudo unzip zip \
+        apt-transport-https gnupg sudo unzip zip \
         unattended-upgrades apt-listchanges dnsutils cron net-tools tcpdump btop
 } &> /dev/null &
 show_spinner $!
